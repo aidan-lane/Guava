@@ -1,4 +1,4 @@
 #!/bin/bash
-bison -o parser.c parser.y
-flex -o scanner.c scanner.l
-g++ -o scanner.out scanner.c -lfl -w
+bison -o parser.cpp parser.y
+flex -o scanner.cpp scanner.l
+g++ -o scanner.out scanner.cpp -lfl

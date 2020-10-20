@@ -1,9 +1,13 @@
 %{
-  #include <iostream>
-  using namespace std;
-  extern "C" void yyerror(char *s);
-  extern "C" int yyparse();
+  #include <stdio.h>
+  #include <string.h>
+
+  extern "C" void yyerror(char const*);
+  extern "C" int yylex();
 %}
+
+%define parse.lac full
+%define parse.error verbose
 
 %union{
   int intVal;
@@ -28,7 +32,7 @@
 %%
 
 main:
-  | MAIN_FUNCTION OPEN_PAREN CLOSE_PAREN OPEN_BRACKET statement CLOSE_BRACKET { cout << $5 << endl; }
+  | MAIN_FUNCTION OPEN_PAREN CLOSE_PAREN OPEN_BRACKET statement CLOSE_BRACKET { printf("%f\n", $5); }
   ;
 
 statement: exp
@@ -42,20 +46,16 @@ exp:
 
 int main(int argc, char **argv) {
   if (argc < 2) {
-    cout << "Provide a filename!" << endl;
+    printf("Provide a filename!\n");
     exit(1);
   }
 
   FILE *src = fopen(argv[1], "r");
   if (!src) {
-    cout << "Could not open file!" << endl;
+    printf("Could not open file!\n");
     exit(1);
   }
 
   yyin = src;
   yyparse();
-}
-
-void yyerror(char *s) {
-  fprintf(stderr, "%s\n", s);
 }
