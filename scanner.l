@@ -2,7 +2,7 @@
 
 %{
   #include <iostream>
-  #include "parser.c"
+  #include "parser.cpp"
   extern "C" void yyerror(char const*);
   using namespace std;
 %}
@@ -17,10 +17,10 @@
 "-"            { return MINUS; }
 "*"            { return MULT; }
 "/"            { return DIV; }
-"{"            { return OPEN_BRACKET; }
-"}"            { return CLOSE_BRACKET; }
-"("            { return OPEN_PAREN; }
-")"            { return CLOSE_PAREN; }
+"{"            { return O_CURLY; }
+"}"            { return C_CURLY; }
+"("            { return O_PAREN; }
+")"            { return C_PAREN; }
 
 "main"         { return MAIN_FUNCTION; }
 
