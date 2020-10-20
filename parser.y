@@ -1,6 +1,6 @@
 %{
-  #include <stdio.h>
-  #include <string.h>
+  #include <bits/stdc++.h>
+  using namespace std;
 
   extern "C" void yyerror(char const*);
   extern "C" int yylex();
@@ -19,10 +19,8 @@
 %token MAIN_FUNCTION
 %token <intVal> INTEGER_LITERAL
 %token <floatVal> FLOAT_LITERAL
-%token OPEN_PAREN
-%token CLOSE_PAREN
-%token OPEN_BRACKET
-%token CLOSE_BRACKET
+%token O_PAREN C_PAREN
+%token O_CURLY C_CURLY
 
 %type <floatVal> exp
 %type <floatVal> statement
@@ -32,7 +30,7 @@
 %%
 
 main:
-  | MAIN_FUNCTION OPEN_PAREN CLOSE_PAREN OPEN_BRACKET statement CLOSE_BRACKET { printf("%f\n", $5); }
+  | MAIN_FUNCTION O_PAREN C_PAREN O_CURLY statement C_CURLY { cout << $5 << endl; }
   ;
 
 statement: exp
@@ -41,18 +39,21 @@ exp:
   INTEGER_LITERAL { $$ = $1; }
   | FLOAT_LITERAL { $$ = $1; }
   | exp PLUS exp  { $$ = $1 + $3; }
+  | exp MINUS exp { $$ = $1 - $3; }
+  | exp MULT exp  { $$ = $1 * $3; }
+  | exp DIV exp   { $$ = $1 / $3; }
 
 %%
 
 int main(int argc, char **argv) {
   if (argc < 2) {
-    printf("Provide a filename!\n");
+    cerr << "Provide a filename!" << endl;
     exit(1);
   }
 
   FILE *src = fopen(argv[1], "r");
   if (!src) {
-    printf("Could not open file!\n");
+    cerr << "Could not open file!" << endl;
     exit(1);
   }
 
