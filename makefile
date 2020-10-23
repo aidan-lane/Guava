@@ -1,10 +1,10 @@
-all: parser scanner compiler
+all: parser.cpp scanner.cpp scanner.out
 
-parser: parser.y
+parser.cpp: parser.y
 	bison -o parser.cpp parser.y
 
-scanner: scanner.l
+scanner.cpp: scanner.l
 	flex -o scanner.cpp scanner.l
 
-compiler: scanner.cpp
-	g++ -o scanner.out scanner.cpp -lfl
+scanner.out: ast.cpp scanner.cpp
+	g++ -o scanner.out ast.cpp scanner.cpp -lfl

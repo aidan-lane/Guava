@@ -3,7 +3,7 @@
  */
 
 extern int yylineno;
-void yyerror(char *s, ...);
+void yyerror(char const *s, ...);
 
 struct ast {
   int nodetype;
@@ -20,4 +20,4 @@ struct ast *new_ast(int nodetype, struct ast *l, struct ast *r);
 struct ast *new_num(float val);
 
 float eval(struct ast *);
-void free(struct ast *);
+void free_ast(struct ast *);

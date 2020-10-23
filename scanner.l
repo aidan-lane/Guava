@@ -3,8 +3,6 @@
 %{
   #include <iostream>
   #include "parser.cpp"
-  extern "C" void yyerror(char const*);
-  using namespace std;
 %}
 
 %%
@@ -22,12 +20,9 @@
 "("            { return LPAREN; }
 ")"            { return RPAREN; }
 ","            { return COMMA; }
+#.             ; /* comment */
+.              { yyerror("Invalid Character %c\n", *yytext); }
 
 "main"         { return MAIN_FUNCTION; }
 
 %%
-
-void yyerror(char const *s) {
-  cout << "ERROR ON LINE:" << yylineno << " " << string(s) << endl;
-  exit(0);
-}
