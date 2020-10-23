@@ -1,5 +1,6 @@
 %{
   #include <bits/stdc++.h>
+  #include "Headers/ast.h"
   using namespace std;
 
   extern "C" void yyerror(char const*);
@@ -9,18 +10,20 @@
 %define parse.lac full
 %define parse.error verbose
 
-%union{
+%union {
+  struct ast *a;
   int intVal;
   float floatVal;
 }
 
-%start main
+%start program
 
 %token MAIN_FUNCTION
 %token <intVal> INTEGER_LITERAL
 %token <floatVal> FLOAT_LITERAL
-%token O_PAREN C_PAREN
-%token O_CURLY C_CURLY
+%token LPAREN RPAREN
+%token LCURLY RCURLY
+%token COMMA
 
 %type <floatVal> exp
 %type <floatVal> statement
@@ -29,19 +32,21 @@
 
 %%
 
-main:
-  | MAIN_FUNCTION O_PAREN C_PAREN O_CURLY statement C_CURLY { cout << $5 << endl; }
+program:
+  | MAIN_FUNCTION LPAREN RPAREN LCURLY statement RCURLY { cout << $5 << endl; }
   ;
 
 statement: exp
 
 exp:
-  INTEGER_LITERAL { $$ = $1; }
-  | FLOAT_LITERAL { $$ = $1; }
-  | exp PLUS exp  { $$ = $1 + $3; }
-  | exp MINUS exp { $$ = $1 - $3; }
-  | exp MULT exp  { $$ = $1 * $3; }
-  | exp DIV exp   { $$ = $1 / $3; }
+  | INTEGER_LITERAL     { $$ = $1; }
+  | FLOAT_LITERAL       { $$ = $1; }
+  | exp PLUS exp        { $$ = $1 + $3; }
+  | exp MINUS exp       { $$ = $1 - $3; }
+  | exp MULT exp        { $$ = $1 * $3; }
+  | exp DIV exp         { $$ = $1 / $3; }
+  | LPAREN exp RPAREN   { $$ = $2; }
+  | FUNC LPAREN args RPAREN 
 
 %%
 

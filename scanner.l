@@ -17,10 +17,11 @@
 "-"            { return MINUS; }
 "*"            { return MULT; }
 "/"            { return DIV; }
-"{"            { return O_CURLY; }
-"}"            { return C_CURLY; }
-"("            { return O_PAREN; }
-")"            { return C_PAREN; }
+"{"            { return LCURLY; }
+"}"            { return RCURLY; }
+"("            { return LPAREN; }
+")"            { return RPAREN; }
+","            { return COMMA; }
 
 "main"         { return MAIN_FUNCTION; }
 
