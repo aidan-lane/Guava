@@ -1,47 +1,55 @@
 %{
   #include <bits/stdc++.h>
+  #include "ast.h"
   using namespace std;
 
-  extern "C" void yyerror(char const*);
   extern "C" int yylex();
 %}
 
 %define parse.lac full
 %define parse.error verbose
 
-%union{
+%union {
+  struct ast *a;
   int intVal;
   float floatVal;
 }
 
-%start main
+%start program
 
 %token MAIN_FUNCTION
 %token <intVal> INTEGER_LITERAL
 %token <floatVal> FLOAT_LITERAL
-%token O_PAREN C_PAREN
-%token O_CURLY C_CURLY
+%token LPAREN RPAREN
+%token LCURLY RCURLY
+%token COMMA
 
-%type <floatVal> exp
-%type <floatVal> statement
+%type <a> exp
+%type <a> statement
 %left PLUS MINUS
 %left MULT DIV MOD
 
 %%
 
-main:
-  | MAIN_FUNCTION O_PAREN C_PAREN O_CURLY statement C_CURLY { cout << $5 << endl; }
+program:
+  | MAIN_FUNCTION LPAREN RPAREN LCURLY statement RCURLY 
+  { 
+    cout << eval($5) << endl;
+    free_ast($5);
+  }
   ;
 
 statement: exp
 
 exp:
-  INTEGER_LITERAL { $$ = $1; }
-  | FLOAT_LITERAL { $$ = $1; }
-  | exp PLUS exp  { $$ = $1 + $3; }
-  | exp MINUS exp { $$ = $1 - $3; }
-  | exp MULT exp  { $$ = $1 * $3; }
-  | exp DIV exp   { $$ = $1 / $3; }
+  INTEGER_LITERAL       { $$ = new_num($1); }
+  | FLOAT_LITERAL       { $$ = new_num($1); }
+  | exp PLUS exp        { $$ = new_ast('+', $1, $3); }
+  | exp MINUS exp       { $$ = new_ast('-', $1, $3); }
+  | exp MULT exp        { $$ = new_ast('*', $1, $3); }
+  | exp DIV exp         { $$ = new_ast('/', $1, $3); }
+  | LPAREN exp RPAREN   { $$ = $2; }
+  ;
 
 %%
 
