@@ -13,42 +13,78 @@
   struct ast *a;
   int intVal;
   float floatVal;
+  struct symbol *s;
+  list<symbol*>* symlist;
+  int fn;
 }
 
 %start program
 
-%token MAIN_FUNCTION
 %token <intVal> INTEGER_LITERAL
 %token <floatVal> FLOAT_LITERAL
+%token <s> REF;
+%token <fn> FUNC;
 %token LPAREN RPAREN
 %token LCURLY RCURLY
 %token COMMA
+%token IF THEN ELSE DEFINE
 
-%type <a> exp
-%type <a> statement
+%type <a> expr stmt block list exprlist
+%type <symlist> symlist
 %left PLUS MINUS
 %left MULT DIV MOD
+%nonassoc <fn> CMP
 
 %%
 
 program:
-  | MAIN_FUNCTION LPAREN RPAREN LCURLY statement RCURLY 
-  { 
-    cout << eval($5) << endl;
-    free_ast($5);
-  }
+  | program stmt { 
+      cout << eval($2) << endl;
+      free_ast($2);
+    }
+  | program DEFINE REF LPAREN symlist RPAREN block {
+      dodef($3, $5, $7);
+    }
   ;
 
-statement: exp
+block: 
+  LCURLY list RCURLY { $$ = $2; }
+  ;
 
-exp:
-  INTEGER_LITERAL       { $$ = new_num($1); }
-  | FLOAT_LITERAL       { $$ = new_num($1); }
-  | exp PLUS exp        { $$ = new_ast('+', $1, $3); }
-  | exp MINUS exp       { $$ = new_ast('-', $1, $3); }
-  | exp MULT exp        { $$ = new_ast('*', $1, $3); }
-  | exp DIV exp         { $$ = new_ast('/', $1, $3); }
-  | LPAREN exp RPAREN   { $$ = $2; }
+stmt:
+  IF expr THEN list             { $$ = new_flow('I', $2, $4, NULL); }
+  | IF expr THEN list ELSE list { $$ = new_flow('I', $2, $4, $6); }
+  | expr                        { $$ = $1; }
+  ;
+
+list:
+  /* empty */ { $$ = NULL; }
+  | stmt
+  ;
+
+expr:
+  /* empty */          { $$ = new_num(0); }
+  | INTEGER_LITERAL    { $$ = new_num($1); }
+  | FLOAT_LITERAL      { $$ = new_num($1); }
+  | expr PLUS expr     { $$ = new_ast('+', $1, $3); }
+  | expr MINUS expr    { $$ = new_ast('-', $1, $3); }
+  | expr MULT expr     { $$ = new_ast('*', $1, $3); }
+  | expr DIV expr      { $$ = new_ast('/', $1, $3); }
+  | LPAREN expr RPAREN { $$ = $2; }
+  | expr CMP expr      { $$ = new_cmp($2, $1, $3); }
+  | REF                { $$ = new_ref($1); }
+  | FUNC LPAREN exprlist RPAREN { $$ = new_func($1, $3); }
+  | REF LPAREN exprlist RPAREN  { $$ = new_call($1, $3); }
+  ;
+
+exprlist:
+  expr
+  | expr COMMA exprlist { $$ = new_ast('L', $1, $3); }
+  ;
+
+symlist:
+  REF                 { $$ = new list<symbol*>(); $$->push_back($1); }
+  | REF COMMA symlist { $$->push_back($1); }
   ;
 
 %%
