@@ -8,7 +8,7 @@
 %%
 
 [ \t\r\v\f]    ; /* whitespace */
-[\n]           { yylineno++; }  ; /* increment line number */
+\n             { yylineno++; }  ; /* increment line number */
 [0-9]+         { yylval.intVal = atoi(yytext); return INTEGER_LITERAL; }
 [0-9]+.[0-9]+  { yylval.floatVal = atof(yytext); return FLOAT_LITERAL; }
 "+"            { return PLUS; }
@@ -20,9 +20,27 @@
 "("            { return LPAREN; }
 ")"            { return RPAREN; }
 ","            { return COMMA; }
-#.             ; /* comment */
+#.*            ; /* comment */
 .              { yyerror("Invalid Character %c\n", *yytext); }
 
-"main"         { return MAIN_FUNCTION; }
+"define"       { return DEFINE; }
+[a-z][A-Z]*    { yylval.s = lookup(yytext); return REF; }
+
+">"            { yylval.fn = 1; return CMP; }
+"<"            { yylval.fn = 2; return CMP; }
+"<>"           { yylval.fn = 3; return CMP; }
+"=="           { yylval.fn = 4; return CMP; }
+">="           { yylval.fn = 5; return CMP; }
+"<="           { yylval.fn = 6; return CMP; }
+
+"if"           { return IF; }
+"then"         { return THEN; }
+"else"         { return ELSE; }
+
+"sqrt"         { yylval.fn = B_sqrt; return FUNC; }
+"exp"          { yylval.fn = B_exp; return FUNC; }
+"log"          { yylval.fn = B_log; return FUNC; }
+
+""
 
 %%
