@@ -1,31 +1,57 @@
-#include <iostream>
-#include "include/mio/mio.hpp"
+#include "lexer.h"
 
-using namespace std;
-
-int handle_error(const error_code& error) 
+int Lexer::handle_error(const error_code& error) 
 {
     const auto& errmsg = error.message();
     cout << "Error mapping file: " << errmsg << ", exiting..." << endl;
     return error.value();
 }
 
-int main(int argc, char **argv) 
+list<Token>* Lexer::lex(const string& path)
 {
-    string path = "test.txt";
     error_code error;
-
-    mio::mmap_source ro_mmap;
-    ro_mmap.map(path, error);
-    if (error) { return handle_error(error); }
+    mio::mmap_source mmap;
+    mmap.map(path, error);
+    if (error) { handle_error(error); }
 
     // read
-    for (auto& b : ro_mmap) {
-        
+    string buffer;
+    for (uint_fast32_t i = 0; i < mmap.size(); i++) {
+        // skip whitespace
+        if (mmap[i] == ' ') continue;
+
+        // parse number
+        if (isdigit(mmap[i])) {
+            while (isdigit(mmap[i])) { buffer += mmap[i]; i++; }
+            if (mmap[i] == '.') {
+                buffer += mmap[i]; i++;
+                while (isdigit(mmap[i])) { buffer += mmap[i]; i++; }
+            }
+
+            tokens.push_back(Token(Number, stod(buffer)));
+            buffer.clear();
+        }
+
+        switch (mmap[i]) {
+            case '+': tokens.push_back(Token(Plus, 0)); break;
+            case '-': tokens.push_back(Token(Minus, 0)); break;
+            case '*': tokens.push_back(Token(Mul, 0)); break;
+            case '/': tokens.push_back(Token(Div, 0)); break;
+            case '(': tokens.push_back(Token(OParen, 0)); break;
+            case ')': tokens.push_back(Token(CParen, 0)); break;
+            default: break; // error
+        }
     }
 
     // cleanup
-    ro_mmap.unmap();
+    mmap.unmap();
 
-    return EXIT_SUCCESS;
+    return &tokens;
+}
+
+void Lexer::print_tokens()
+{
+    for (auto& tok : tokens) {
+        tok.print();
+    }
 }

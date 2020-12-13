@@ -3,16 +3,19 @@
 
 #include <iostream>
 #include <list>
+#include "../include/mio/mio.hpp"
+#include "token.h"
 
 using namespace std;
 
 class Lexer {
 public:
-    void lex(const string& path);
-    void clear();
+    list<Token>* lex(const string& path);
+    int handle_error(const error_code& error);
+    void print_tokens();
 
 private:
-    list<int> tokens;
+    list<Token> tokens;
 };
 
 #endif
