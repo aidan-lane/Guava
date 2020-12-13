@@ -16,6 +16,7 @@ public:
 
 private:
     list<Token> tokens;
+    int lineno, colno;
 };
 
 #endif

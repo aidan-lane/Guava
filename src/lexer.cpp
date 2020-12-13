@@ -16,11 +16,16 @@ list<Token>* Lexer::lex(const string& path)
 
     // read
     string buffer;
+    lineno = 1;
+    colno = 0;
     for (uint_fast32_t i = 0; i < mmap.size(); i++) {
+        colno++;
+
         // skip whitespace
         if (mmap[i] == ' ') continue;
+        if (mmap[i] == '\n') { lineno++; continue; }
 
-        // parse number
+        // numbers
         if (isdigit(mmap[i])) {
             while (isdigit(mmap[i])) { buffer += mmap[i]; i++; }
             if (mmap[i] == '.') {
@@ -30,16 +35,35 @@ list<Token>* Lexer::lex(const string& path)
 
             tokens.push_back(Token(Number, stod(buffer)));
             buffer.clear();
+            i--;
         }
+        else if (isalpha(mmap[i])) { // names
+            while (isalnum(mmap[i])) { buffer += mmap[i]; i++; }
 
-        switch (mmap[i]) {
+            tokens.push_back(Token(Name, 0, buffer));
+            buffer.clear();
+            i--;
+        }
+        else if (mmap[i] == '\"') { // strings
+            i++;
+            while (mmap[i] != '\"') { buffer += mmap[i]; i++; }
+
+            tokens.push_back(Token(String, 0, buffer));
+            buffer.clear();
+        }
+        else {
+            switch (mmap[i]) {
             case '+': tokens.push_back(Token(Plus, 0)); break;
             case '-': tokens.push_back(Token(Minus, 0)); break;
             case '*': tokens.push_back(Token(Mul, 0)); break;
             case '/': tokens.push_back(Token(Div, 0)); break;
             case '(': tokens.push_back(Token(OParen, 0)); break;
             case ')': tokens.push_back(Token(CParen, 0)); break;
-            default: break; // error
+            default: // error
+                cerr << "Invalid character " << mmap[i] << " at " << lineno << ":" << colno << endl;
+                exit(-1);
+                break;
+            }
         }
     }
 

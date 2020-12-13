@@ -13,15 +13,21 @@ enum TokenType {
     Div,
     Number,
     OParen,
-    CParen
+    CParen,
+    Name,
+    String
 };
 
 class Token {
 public:
     TokenType type;
     double val;
+    string symbol;
 
-    Token(TokenType type, double val) : type(type), val(val) {}
+    Token(TokenType type, double val) :
+        type(type), val(val), symbol("") {}
+    Token(TokenType type, double val, string symbol) : 
+        type(type), val(val), symbol(symbol) {}
     void print();
 };
 
